@@ -1,0 +1,254 @@
+{% extends "header.html" %}
+
+{% for mess in get_flashed_messages()  %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" class="fade close">
+	<span aria-hidden="true">&times;</span>
+  </button>
+  {{mess}}
+  </div>
+{% endfor %}
+
+{% block body %}
+{% if firstname != 'None' %}
+    <h1>Welcome, {{firstname['FirstName']}}</h1>
+{% endif %}
+
+<style type="text/css">
+    table, th, td{
+        border: 1px solid black;
+    }
+</style>
+<br>
+<h2>View Your Upcoming Flights</h2>
+<table class = "table">
+    <th>Airline Name</th>
+    <th>Flight Number</th>
+    <th>Departure Time</th>
+    <th>Departure Date</th>
+	<th>Purchase Date</th>
+	<th>Purchase Time</th>
+	<th>Ticketholder</th>
+	<th>Delete Ticket</th>
+{% for row in future_flights %}
+    <tr>
+        <td>{{row['Airline_name']}}</td>
+        <td>{{row['Flight_num']}}</td>
+        <td>{{row['Departure_time']}}</td>
+        <td>{{row['Departure_date']}}</td>
+		<td>{{row['Purchase_date']}}</td>
+		<td>{{row['Purchase_time']}}</td>
+		<td>{{row['FirstName']}} {{row['LastName']}}</td>
+		<td>
+			<a href="{{ url_for('delete', Airline_name=row['Airline_name'], Flight_num=row['Flight_num'], Departure_time=row['Departure_time'], Departure_date=row['Departure_date'])}}">
+			<input type="submit" value = "Delete" /> </br>
+		</td>
+    </tr>
+{% endfor %}
+</table>
+
+
+<br>
+<h2>View Your Past Flights</h2>
+<table class = "table">
+    <th>Airline Name</th>
+    <th>Flight Number</th>
+    <th>Departure Time</th>
+    <th>Departure Date</th>
+	<th>Rate/Comment</th>
+{% for row in past_flights %}
+    <tr>
+        <td>{{row['Airline_name']}}</td>
+        <td>{{row['Flight_num']}}</td>
+        <td>{{row['Departure_time']}}</td>
+        <td>{{row['Departure_date']}}</td>
+		<td>
+		  <form action="{{url_for('rate_comment', Airline_name=row['Airline_name'], Flight_num=row['Flight_num'], Departure_time=row['Departure_time'], Departure_date=row['Departure_date'])}}" method="POST">
+			<div class="row">
+				<div class="col-4">
+					<input type="number" class="form-control" name = "Rating" placeholder="rating (1-10)" required/>
+				</div>
+				<div class="col-6">
+					<input type="text" class="form-control" name = "Comment" placeholder="comment" required/>
+				</div>
+			</div>
+			<input type="submit" value = "Post" /> </br>
+		  </form>
+		</td>
+    </tr>
+{% endfor %}
+</table>
+<br>
+
+
+<h2>Search For Flights by Airport Name or City</h2>
+<form action="/cus_home" method="POST">
+	  <div class="row">
+		<div class="col">
+			<input type="text" class="form-control" name = "source_airp" placeholder="From (Airport Name)"/> </br>
+		</div>
+		<div class="col">
+			<input type="text" class="form-control" name = "source_city" placeholder="From (City)"/> </br>
+		</div>
+	  </div>
+	  <div class="row">
+		<div class="col">
+			<input type="text" class="form-control" name = "destination_airp" placeholder="To (Airport Name)"/> </br>
+		</div>
+		<div class="col">
+			<input type="text" class="form-control" name = "destination_city" placeholder="To (City)"/> </br>
+		</div>
+	  </div>
+	<div class="form-check form-check-inline">
+		<input class="form-check-input" type="radio" name="options" id="inlineRadio1" value="option1">
+		<label class="form-check-label" for="inlineRadio1">One-Way</label>
+	  </div>
+	  <div class="form-check form-check-inline">
+		<input class="form-check-input" type="radio" name="options" id="inlineRadio2" value="option2">
+		<label class="form-check-label" for="inlineRadio2">Round Trip</label>
+	  </div>
+	  <br><br>
+	<div class="row">
+		<div class="col-4">
+			<b>Departure Date</b>
+		</div>
+		<div class="col-4">
+			<b>Return Date</b>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-4">
+			<input class="form-control" type="date" name = "depart" placeholder="Depart"/>
+		</div>
+		<div class="col-4">
+   			<input class="form-control" type="date" name = "return" placeholder="Return"/>
+		</div>
+	</div>
+	<br>
+    <input class= "btn btn-primary" type="submit" value = "Search" /> </br>
+<br>
+</form>
+
+{% if going != 'None' %}
+	{% if trip_type == 'option2' %}   <!-- Round Trip -->
+    	<h4>Departing Flights</h4>
+	{% else %}    <!-- One Way -->
+    	<h4>Flights</h4>
+	{% endif %}
+    <table class = "table">
+        <th>Airline Name</th>
+        <th>Flight Number</th>
+        <th>Departure Time</th>
+        <th>Departure Date</th>
+        <th>Arrival Time</th>
+        <th>Arrival Date</th>
+		<th>Departure City</th>
+		<th>Arrival City</th>
+        <th>Departure Airport</th>
+        <th>Arrival Airport</th>
+		<th>Purchase</th>
+    {% for row in going %}
+        <tr>
+            <td>{{row['Airline_name']}}</td>
+            <td>{{row['Flight_num']}}</td>
+            <td>{{row['Departure_time']}}</td>
+            <td>{{row['Departure_date']}}</td>
+            <td>{{row['Arrival_time']}}</td>
+            <td>{{row['Arrival_date']}}</td>
+			<td>{{row['City']}}</td>
+            <td>{{row['B.City']}}</td>
+            <td>{{row['Name']}}</td>
+            <td>{{row['B.Name']}}</td>
+			<td>
+				<form action="{{url_for('purchase', Airline_name=row['Airline_name'], Flight_num=row['Flight_num'], Departure_time=row['Departure_time'], Departure_date=row['Departure_date'])}}" method="POST">
+					  <div class="col">
+						<input type="text" class="form-control" name = "FirstName" placeholder="first name" required/>
+					  </div>
+					  <div class="col">
+						<input type="text" class="form-control" name = "LastName" placeholder="last name" required/>
+					  </div>
+					  <div class="col">
+						<input type="text" class="form-control" name = "Date_of_birth" placeholder="date of birth (YYYY-MM-DD)" required/>
+					  </div>
+						<div class="col">
+						  <input type="text" class="form-control" name = "Card_num" placeholder="card number" required/>
+						</div>
+						<div class="col">
+							<input type="text" class="form-control" name = "Name_on_card" placeholder="name on card" required/>
+						  </div>
+						<div class="col">
+						  <input type="text" class="form-control" name = "Expiration_date" placeholder="expiration date (YYYY-MM-DD)" required/>
+						</div>
+						<div class="col">
+						  <input type="text" class="form-control" name = "Card_type" placeholder="card type" required/>
+						</div>
+					<input type="submit" value = "Purchase" />
+				  </form>
+			</td>
+        </tr>
+    {% endfor %}
+    </table>
+	{% if trip_type == 'option2' %}
+		<h4>Returning Trips</h4>
+		<table class = "table">
+			<th>Airline Name</th>
+			<th>Flight Number</th>
+			<th>Departure Time</th>
+			<th>Departure Date</th>
+			<th>Arrival Time</th>
+			<th>Arrival Date</th>
+			<th>Departure City</th>
+			<th>Arrival City</th>
+			<th>Departure Airport</th>
+			<th>Arrival Airport</th>
+			<th>Purchase</th>
+		{% for row in returning %}
+			<tr>
+				<td>{{row['Airline_name']}}</td>
+				<td>{{row['Flight_num']}}</td>
+				<td>{{row['Departure_time']}}</td>
+				<td>{{row['Departure_date']}}</td>
+				<td>{{row['Arrival_time']}}</td>
+				<td>{{row['Arrival_date']}}</td>
+				<td>{{row['City']}}</td>
+				<td>{{row['B.City']}}</td>
+				<td>{{row['Name']}}</td>
+				<td>{{row['B.Name']}}</td>
+				<td>
+					<form action="{{url_for('purchase', Airline_name=row['Airline_name'], Flight_num=row['Flight_num'], Departure_time=row['Departure_time'], Departure_date=row['Departure_date'])}}" method="POST">
+						<div class="col">
+						  <input type="text" class="form-control" name = "FirstName" placeholder="first name" required/>
+						</div>
+						<div class="col">
+						  <input type="text" class="form-control" name = "LastName" placeholder="last name" required/>
+						</div>
+						<div class="col">
+						  <input type="text" class="form-control" name = "Date_of_birth" placeholder="date of birth (YYYY-MM-DD)" required/>
+						</div>
+						  <div class="col">
+							<input type="text" class="form-control" name = "Card_num" placeholder="card number" required/>
+						  </div>
+						  <div class="col">
+							  <input type="text" class="form-control" name = "Name_on_card" placeholder="name on card" required/>
+							</div>
+						  <div class="col">
+							<input type="text" class="form-control" name = "Expiration_date" placeholder="expiration date (YYYY-MM-DD)" required/>
+						  </div>
+						  <div class="col">
+							<input type="text" class="form-control" name = "Card_type" placeholder="card type" required/>
+						  </div>
+					  <input type="submit" value = "Purchase" />
+					</form>
+				</td>
+			</tr>
+		{% endfor %}
+		</table>
+	{% endif %}
+{% endif %}
+<br>
+
+<a href="/track_spending"> Track My Spending</a>
+
+<br>
+<a href="/logout">Logout</a><br>
+{% endblock %}
